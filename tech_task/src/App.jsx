@@ -1,20 +1,20 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import "./App.css"
 
 export default function App() {
   const [projects, setProjects] = useState([])
   const [selectedProjectId, setSelectedProjectId] = useState(null)
   const [route, setRoute] = useState("ProjectsList")
-  const hasLoaded = useRef(false)
 
   useEffect(() => {
-    const allProjects = JSON.parse(localStorage.getItem("projects")) || []
-    setProjects(allProjects)
-    hasLoaded.current = true
+    const saved = localStorage.getItem("projects")
+    if (saved) {
+      setProjects(JSON.parse(saved))
+    }
   }, [])
 
   useEffect(() => {
-    if (hasLoaded.current) {
+    if (projects.length > 0) {
       localStorage.setItem("projects", JSON.stringify(projects))
     }
   }, [projects])
@@ -74,26 +74,31 @@ export default function App() {
         return p
       })
     )
+    alert("Task updated successfully")
   }
 
   const selectedProject = projects.find((p) => p.id === selectedProjectId)
 
   return (
     <>
+      {" "}
       <h1>Project Management Dashboard</h1>
       {route === "ProjectsList" && (
         <>
+          {" "}
           <div className="btn1">
-            <button onClick={() => setRoute("AddProject")}>New Project</button>
-          </div>
+            <button onClick={() => setRoute("AddProject")}>New Project</button>{" "}
+          </div>{" "}
           <div className="project-list">
+            {" "}
             <ul>
               {projects.map((project) => (
                 <li key={project.id} className="project-card">
+                  {" "}
                   <div className="project-info">
-                    <h3>{project.title}</h3>
-                    <p>{project.description}</p>
-                  </div>
+                    {" "}
+                    <h3>{project.title}</h3> <p>{project.description}</p>{" "}
+                  </div>{" "}
                   <div className="project-actions">
                     <button
                       onClick={() => {
@@ -101,7 +106,7 @@ export default function App() {
                         setRoute("Tasks")
                       }}
                     >
-                      View Tasks
+                      View Tasks{" "}
                     </button>
                     <button
                       onClick={() => {
@@ -109,15 +114,15 @@ export default function App() {
                         setRoute("EditProject")
                       }}
                     >
-                      Edit
+                      Edit{" "}
                     </button>
                     <button onClick={() => deleteProject(project.id)}>
-                      Delete
-                    </button>
-                  </div>
+                      Delete{" "}
+                    </button>{" "}
+                  </div>{" "}
                 </li>
-              ))}
-            </ul>
+              ))}{" "}
+            </ul>{" "}
           </div>
         </>
       )}
@@ -157,6 +162,7 @@ function ProjectForm({ project = {}, onSave, onCancel }) {
 
   return (
     <div className="projectform">
+      {" "}
       <label htmlFor="title">Project Title</label>
       <input
         type="text"
@@ -164,7 +170,7 @@ function ProjectForm({ project = {}, onSave, onCancel }) {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         id="title"
-      />
+      />{" "}
       <label htmlFor="description">Project Description</label>
       <input
         type="text"
@@ -173,8 +179,8 @@ function ProjectForm({ project = {}, onSave, onCancel }) {
         onChange={(e) => setDescription(e.target.value)}
         id="description"
       />
-      <button onClick={() => onSave(title, description)}>Submit</button>
-      <button onClick={onCancel}>Cancel</button>
+      <button onClick={() => onSave(title, description)}>Submit</button>{" "}
+      <button onClick={onCancel}>Cancel</button>{" "}
     </div>
   )
 }
@@ -201,7 +207,9 @@ function TaskForm({ project = {}, onSave, onDelete, onCancel, onUpdateTask }) {
 
   return (
     <>
+      {" "}
       <div className="taskform">
+        {" "}
         <label htmlFor="tasktitle">Task Title</label>
         <input
           type="text"
@@ -209,7 +217,7 @@ function TaskForm({ project = {}, onSave, onDelete, onCancel, onUpdateTask }) {
           value={newTask.title}
           onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
           id="tasktitle"
-        />
+        />{" "}
         <label htmlFor="duedate">Due Date</label>
         <input
           type="date"
@@ -217,42 +225,36 @@ function TaskForm({ project = {}, onSave, onDelete, onCancel, onUpdateTask }) {
           value={newTask.dueDate}
           onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
           id="duedate"
-        />
+        />{" "}
         <label htmlFor="status">Status</label>
         <select
           name="status"
           value={newTask.status}
           onChange={(e) => setNewTask({ ...newTask, status: e.target.value })}
         >
-          <option value="Pending">Pending</option>
-          <option value="In Progress">In Progress</option>
-          <option value="Done">Done</option>
+          {" "}
+          <option value="Pending">Pending</option>{" "}
+          <option value="In Progress">In Progress</option>{" "}
+          <option value="Done">Done</option>{" "}
         </select>
         <button
           onClick={() => {
             if (!newTask.title.trim()) return alert("Title is required")
 
             if (editingTaskId) {
-              const updatedTask = { ...newTask, id: editingTaskId }
-              const updatedTasks = project.tasks.map((task) =>
-                task.id === editingTaskId ? updatedTask : task
-              )
-              onSave({ ...project, tasks: updatedTasks }) // pass updated project
+              onUpdateTask(editingTaskId, newTask)
             } else {
               onSave(newTask)
             }
 
-            // Reset form
             setNewTask({ title: "", dueDate: "", status: "Pending" })
             setEditingTaskId(null)
           }}
         >
           {editingTaskId ? "Update" : "Submit"}
         </button>
-
         <button onClick={onCancel}>Back to Projects</button>
       </div>
-
       <div className="action-tasks">
         <div style={{ marginTop: "20px", marginRight: "20px" }}>
           Filter:
@@ -270,7 +272,6 @@ function TaskForm({ project = {}, onSave, onDelete, onCancel, onUpdateTask }) {
           </button>
         </div>
       </div>
-
       <div className="project-list">
         <ul>
           {sorted.map((task) => (
@@ -283,16 +284,18 @@ function TaskForm({ project = {}, onSave, onDelete, onCancel, onUpdateTask }) {
 
               <div className="project-actions">
                 <button
-                  className="project-actions"
                   onClick={() => {
-                    const updated = prompt("Edit title", task.title)
-                    if (updated && updated.trim()) {
-                      onUpdateTask(task.id, { title: updated })
-                    }
+                    setNewTask({
+                      title: task.title,
+                      dueDate: task.dueDate,
+                      status: task.status,
+                    })
+                    setEditingTaskId(task.id)
                   }}
                 >
                   Edit
                 </button>
+
                 <button onClick={() => onDelete(task.id)}>Delete</button>
               </div>
             </li>
