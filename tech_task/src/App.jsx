@@ -20,14 +20,18 @@ export default function App() {
   }, [projects])
 
   const saveProject = (title, description) => {
-    const newProject = {
-      id: Date.now(),
-      title,
-      description,
-      tasks: [],
+    if (title && description !== "") {
+      const newProject = {
+        id: Date.now(),
+        title,
+        description,
+        tasks: [],
+      }
+      setProjects((prev) => [...prev, newProject])
+      setRoute("ProjectsList")
+    } else {
+      alert("Both title and description required")
     }
-    setProjects((prev) => [...prev, newProject])
-    setRoute("ProjectsList")
   }
 
   const updateProject = (id, title, description) => {
@@ -239,7 +243,8 @@ function TaskForm({ project = {}, onSave, onDelete, onCancel, onUpdateTask }) {
         </select>
         <button
           onClick={() => {
-            if (!newTask.title.trim()) return alert("Title is required")
+            if (!newTask.title.trim()) return alert("Task title is required")
+            if (!newTask.dueDate) return alert("Due date is required")
 
             if (editingTaskId) {
               onUpdateTask(editingTaskId, newTask)
